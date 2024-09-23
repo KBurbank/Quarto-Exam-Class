@@ -1,0 +1,52 @@
+---
+title: "Example Exam"
+format: 
+  examQuestion-pdf
+---
+
+```{r echo=F}
+library(knitr)
+knitr::opts_chunk$set(fig.width=4, fig.height=3, message=F, warning=F, collapse=TRUE)
+```
+
+
+
+\qformat{\textbf{\thequestion. \textit{\thequestiontitle}}\hfill}
+
+
+\pagestyle{headandfoot}
+\footer{}{Page \thepage\ of \pageref*{LastPage}}{}
+
+\ifprintanswers
+\addpoints
+\gradetable[v][questions]
+\fi
+
+\vspace{0.5cm}
+
+
+
+\begin{questions}
+
+
+
+{{< include Questions/Course_Load.qmd >}}
+
+\newpage
+
+{{< include Questions/Cough_Syrup.qmd >}}
+
+\newpage
+
+
+
+\end{questions}
+
+
+
+
+\vspace{10mm}
+
+
+
+

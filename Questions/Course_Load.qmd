@@ -1,0 +1,110 @@
+
+\titledquestion{Course Load}
+
+This question has 2 parts: (a) and (b).
+
+A university in the Midwest has 7000 undergrads. Based on the registration records, the 7000 undergrads on average take $\mu=3.5$ courses in Spring 2024 with a standard deviation of $\sigma=0.68$.
+All of them take at least one course and nobody take over 5 courses in Spring 2024.
+
+\begin{parts}
+\part[6] Calculate the (approximate) 
+probability that a simple random sample of 100 undergrads from this university
+take 3.6 courses or more on average.
+\begin{solution}
+Let $\bar{X}$ be the sample mean of the number of courses the selected $100$ undergrads take. By CLT, 
+$$\bar{X} \dot\sim \mbox{N}(\mu = 3.5, \frac{\sigma}{\sqrt{n}} = 0.068)\,.$$
+The probability that the sample mean is greater than 3.6 courses can be calculated as
+$$P(\bar{X} > 3.6) \approx P(Z > \frac{3.6-3.5}{0.068}) = P(Z > 1.47) = 1 - P(Z < 1.47) = 1 - 0.9292 = 0.0708\,.$$
+\end{solution}
+
+\begin{solution}
+Let $\bar{X}$ be the sample mean of the number of courses the selected $100$ undergrads take. By CLT, 
+$$\bar{X} \dot\sim \mbox{N}(\mu = 3.5, \frac{\sigma}{\sqrt{n}} = 0.068)\,.$$
+The probability that the sample mean is greater than 3.6 courses can be calculated as
+$$P(\bar{X} > 3.6) \approx P(Z > \frac{3.6-3.5}{0.068}) = P(Z > 1.47) = 1 - P(Z < 1.47) = 1 - 0.9292 = 0.0708\,.$$
+
+\begin{itemize}
+\item 3pts for CLT - 1pt for the mean and 2 pts for the SE. 
+\item 1pt for calculating the z-score.
+\item 1pt for finding the lower tail probability. Give the point if the student writes down the R code using "pnorm" function instead of checking the normal table.
+\item 1pt for subtracting the lower tail probability from 1 and get the correct final answer.
+\item No points will be deducted for rounding errors. 
+\item When applicable, please give partial credits for the rest of a question if the students get an incorrect answers in the preceding part, provided the answers are consistent with what the students get previously.
+\end{itemize}
+
+\end{solution}
+
+\part[4] Please match the 3 histograms below (I, II, III) with the correct descriptions (A, B, C) of the histograms by filling A, B, C in the table below.
+
+
+
+
+
+
+```{r}
+#| echo: false
+#| fig-width: 8.2
+#| fig-height: 1.6
+#| fig-show: hold
+#| out-width: "96%"
+#| fig-align: right
+#| cache: true
+set.seed(1980)
+x = 1:5
+p = c(0.03,0.01, 0.4, 0.55, 0.01)
+mu = sum(x*p)
+sigma = sqrt(sum((x-mu)^2*p))
+
+par(mai=c(0.3, 0.2, 0.25, 0.01), mgp=c(1.8, 1, 0), mfrow=c(1,3))
+barplot(height = p, width=1, space=0, yaxt='n')
+axis(side=1, at = 1:5-0.5, labels=1:5, cex.axis=1.5)
+mtext(side=3,"I", cex=1.5)
+
+samplemeans = vector("numeric", 10000)
+for(i in 1:10000){
+  samplemeans[i] = mean(sample(x, size = 200, replace=T, prob=p))
+}  
+hist(samplemeans, breaks=seq(min(samplemeans)-0.005,max(samplemeans)+0.005,by=0.01), ann=F,yaxt="n", cex.axis=1.5)
+mtext(side=3,"II", cex=1.5)
+
+samplemeans16 = vector("numeric", 10000)
+for(i in 1:10000){
+  samplemeans16[i] = mean(sample(x, size = 16, replace=T, prob=p))
+}  
+hist(samplemeans16, breaks=seq(min(samplemeans16)-1/32,max(samplemeans16)+1/32,by=1/16), ann=F,yaxt="n", cex.axis=1.5)
+mtext(side=3,"III", cex=1.5)
+```
+
+
+
+
+\begin{itemize}\itemsep=2pt
+\item (A) sampling distribution of the average number of courses enrolled for 16 randomly selected undergrads
+in this University
+\item (B) same as (A) but for 200 randomly selected undergrads
+\item (C) histogram of the number of courses enrolled for all 7000 undergrads in this University
+\end{itemize}
+
+\begin{solution}
+C, B, A
+
+\end{solution}
+\end{parts}
+
+\begin{minipage}[t]{0.68\linewidth} 
+
+\begin{flushright}
+\begin{tabular}{|c|c|}
+\hline
+Histogram & Description \\
+\hline
+I & \\
+\hline
+II & \\
+\hline
+III & \\
+\hline
+\end{tabular}
+\end{flushright}
+\end{minipage}
+
