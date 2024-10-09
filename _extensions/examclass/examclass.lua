@@ -75,14 +75,30 @@ function process_element(el, depth)
         return el
     end
     -- Check for environments
+
     for _, env in ipairs(environments) do
         local begin_pattern = '\\begin{' .. env .. '}'
         local end_pattern = '\\end{' .. env .. '}'
-        if starts_with(begin_pattern, el.text) and ends_with(end_pattern, el.text) then
-            local content = el.text:sub(#begin_pattern + 1, -#end_pattern - 1)
-            return process_content(begin_pattern, content, end_pattern, depth + 1)
+        if starts_with(begin_pattern, el.text) then
+            local content_start = #begin_pattern + 1
+            local optional_arg = ''
+            
+            -- Check for optional argument
+            if el.text:sub(content_start, content_start) == '[' then
+                local close_bracket = el.text:find(']', content_start)
+                if close_bracket then
+                    optional_arg = el.text:sub(content_start, close_bracket)
+                    content_start = close_bracket + 1
+                end
+            end
+            
+            if ends_with(end_pattern, el.text) then
+                local content = el.text:sub(content_start, -#end_pattern - 1)
+                return process_content(begin_pattern .. optional_arg, content, end_pattern, depth + 1)
+            end
         end
     end
+
     
     -- Check for commands
     for _, cmd in ipairs(commands) do
