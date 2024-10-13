@@ -13,14 +13,6 @@ function RawBlock(el)
     return el
 end
 
-function Para(el)
-    return pandoc.Div(split_latex_lines(el.content))
-end
-
-function Plain(el)
-    return pandoc.Div(split_latex_lines(el.content))
-end
-
 function process_inline_container(el, depth)
     if depth >= MAX_DEPTH then
         return el
@@ -187,122 +179,44 @@ function ends_with(ending, str)
     return ending == "" or str:sub(-#ending) == ending
 end
 
-function process_latex_comments(el)
-    local result = {}
-    local current_latex_comment = nil
 
-    for _, inline in ipairs(el.content) do
-        if inline.t == "Str" and inline.text:match("^%%") then
-            -- Start or continue a LaTeX comment
-            if current_latex_comment then
-                current_latex_comment.text = current_latex_comment.text .. " " .. inline.text
+
+-- Check whether a block contains a Latex comment, i.e. a line starting with %. If it does, return a RawBlock with the content of the block, otherwise return the block.
+-- This is needed because Pandoc doesn't automatically Latex comments in Markdown code, and it escapes the % automatically..
+
+function find_comments(block)
+    contains_comment = false
+    for i, el in ipairs(block.content) do
+        if el.t == "Str" and el.text:match("^%%") then
+            if i == 1 or (i > 1 and block.content[i-1].t == "SoftBreak") then
+                contains_comment = true
+            end
+        end
+    end
+    if contains_comment then
+        local result = {}
+        
+
+        for _, item in ipairs(block.content) do
+            if item.t == "Str" then
+                table.insert(result, pandoc.RawInline("tex", item.text))
+            elseif item.t == "Space" then
+                table.insert(result, pandoc.RawInline("tex", " "))
             else
-                current_latex_comment = pandoc.RawInline("tex", inline.text)
-            end
-        else
-            -- End the current LaTeX comment if exists
-            if current_latex_comment then
-                table.insert(result, current_latex_comment)
-                current_latex_comment = nil
-            end
-            table.insert(result, inline)
-        end
-    end
-
-    -- Add any remaining LaTeX comment
-    if current_latex_comment then
-        table.insert(result, current_latex_comment)
-    end
-
-    return el.t == "Para" and pandoc.Para(result) or pandoc.Plain(result)
-end
-
-function Block(el)
-    if el.t == "Para" or el.t == "Plain" then
-        local new_content = {}
-        for i, inline in ipairs(el.content) do
-            if inline.t == "Str" and inline.text:match("^%%") then
-                -- This is a % at the start of a line, treat it as raw LaTeX
-                table.insert(new_content, pandoc.RawInline("tex", inline.text))
-            else
-                table.insert(new_content, inline)
+                table.insert(result, item)
             end
         end
-        return el.t == "Para" and pandoc.Para(new_content) or pandoc.Plain(new_content)
+        return result
+    else
+        return block.content
     end
-    return el
 end
 
-function Str(el)
-    if el.text:match("^%%") then
-        return pandoc.RawInline("tex", el.text)
-    end
-    return el
+function Para(el)
+    return pandoc.Para(find_comments(el))
 end
 
-function split_latex_lines(content)
-    local result = {}
-    local current_line = {}
-    local in_latex = false
-
-    for _, inline in ipairs(content) do
-        if inline.t == "SoftBreak" or inline.t == "LineBreak" then
-            -- End the current line
-            if in_latex then
-                table.insert(result, pandoc.RawBlock("tex", table.concat(current_line, "")))
-            elseif #current_line > 0 then
-                table.insert(result, pandoc.Plain(current_line))
-            end
-            current_line = {}
-            in_latex = false
-            table.insert(result, inline)
-        elseif #current_line == 0 and inline.t == "Str" and (inline.text:match("^%%") or inline.text:match("^\\")) then
-            -- Start a new latex line
-            in_latex = true
-            table.insert(current_line, inline)
-        else
-            -- Continue the current line
-            table.insert(current_line, inline)
-        end
-    end
-
-    -- Add any remaining content
-    if #current_line > 0 then
-        if in_latex then
-            table.insert(result, pandoc.RawBlock("tex", table.concat(current_line, "")))
-        else
-            table.insert(result, pandoc.Plain(current_line))
-        end
-    end
-
-    return result
+function Plain(el)
+    return pandoc.Plain(find_comments(el))
 end
 
-function is_latex_line(inlines)
-    local first = inlines[1]
-    return first and first.t == "Str" and (first.text:match("^%%") or first.text:match("^\\"))
-end
-
-function convert_to_raw_tex(inlines)
-    local tex = {}
-    for _, inline in ipairs(inlines) do
-        table.insert(tex, pandoc.utils.stringify(inline))
-    end
-    return pandoc.RawBlock("tex", table.concat(tex, ""))
-end
-
-function Pandoc(doc)
-    local new_blocks = {}
-    for _, block in ipairs(doc.blocks) do
-        if block.t == "Para" or block.t == "Plain" then
-            if is_latex_line(block.content) then
-                table.insert(new_blocks, convert_to_raw_tex(block.content))
-            else
-                table.insert(new_blocks, block)
-            end
-        else
-            table.insert(new_blocks, block)
-        end
-    end
-    return pandoc.Pandoc(new_blocks, doc.meta)
-end
