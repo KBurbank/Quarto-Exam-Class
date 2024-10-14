@@ -2,8 +2,8 @@
 -- The script works by finding the specific environments used by the Exam class and manually processing the content of these environments using the usual Markdown reader.
 -- It also processes the "part" command and marks it as raw inline (as well as "question", "subpart" and "titledquestion").
 
-local environments = {"questions", "parts", "subparts", "solution", "coverpages"}
-local commands = { "part","question", "subpart","titledquestion"}
+local environments = {"questions", "parts", "subparts", "subsubparts", "solution", "coverpages", "EnvFullwidth", "solution", "choices","checkboxes"}
+local commands = { "part","question", "subpart","titledquestion", "subsubpart", "choice","CorrectChoice"}
 local MAX_DEPTH = 5
 
 function RawBlock(el)
