@@ -22,7 +22,8 @@ function process_inline_container(el, depth)
     local i = 1
     while i <= #el.content do
         local inline = el.content[i]
-        if (inline.t == "RawInline" or inline.t == "Str")  then
+        if inline.t == "Str" then
+            -- Process for LaTeX commands as before
             local command_found = false
             for _, cmd in ipairs(commands) do
                 local cmd_pattern = '\\' .. cmd
@@ -48,13 +49,18 @@ function process_inline_container(el, depth)
                     end
                     i = j - 1
                     command_found = true
+
                     break
                 end
             end
             if not command_found then
                 table.insert(result, inline)
             end
+        elseif inline.t == "RawInline" then
+
+            table.insert(result, inline)
         else
+            -- Handle other element types
             table.insert(result, inline)
         end
         i = i + 1
@@ -99,7 +105,9 @@ function process_element(el, depth)
             local cmd_end, content_start = find_command_end(el.text, #cmd_pattern + 1)
             local command_with_args = el.text:sub(1, cmd_end)
             local content = el.text:sub(content_start)
+
             return process_content(command_with_args, content, nil, depth + 1)
+            
         end
     end
     
@@ -219,4 +227,5 @@ end
 function Plain(el)
     return pandoc.Plain(find_comments(el))
 end
+
 

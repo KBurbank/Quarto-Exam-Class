@@ -1,7 +1,8 @@
 ---
 title: "Example Exam"
 format: 
-  examQuestion-pdf
+  examClass-pdf:
+    keep-tex: true
 ---
 
 ```{r echo=F}
@@ -9,24 +10,70 @@ library(knitr)
 knitr::opts_chunk$set(fig.width=4, fig.height=3, message=F, warning=F, collapse=TRUE)
 ```
 
+% This is an example exam file written in RMarkdown using the examClass package.
 
 
+
+
+
+% ---------- Exam class options ---------- %
+
+%\printanswers
+
+
+
+% Set the format of the question numbers and titles.  "thequestion" is the question number and "thequestiontitle" is the question title.
 \qformat{\textbf{\thequestion. \textit{\thequestiontitle}}\hfill}
 
-
+% Set the page style to have a header and footer.
 \pagestyle{headandfoot}
 \footer{}{Page \thepage\ of \pageref*{LastPage}}{}
 
-\ifprintanswers
+% Add a grading table.
 \addpoints
 \gradetable[v][questions]
+
+
+% Optional content that is only printed if answers are printed.
+\ifprintanswers
+% Whatever is inside here will only be printed if answers are printed.
+**Solutions**
+\fi
+
+% Optional content that is printed only if answers are not printed.
+\ifprintanswers
+\else
+% Whatever is inside here will only be printed if answers are not printed.
+\begin{center}
+Instructions for students:
+Here are some instructions.
+\end{center}
 \fi
 
 \vspace{0.5cm}
 
 
-
 \begin{questions}
+
+\titledquestion{"This is a question"}
+
+This is a general question.
+\begin{parts}
+\part
+This is a part.
+\part
+This part has subparts.
+\begin{subparts}
+\subpart
+This is a subpart.
+\subpart
+This subpart has subsubparts! 
+\begin{subsubparts}
+\subsubpart
+This is a subsubpart.
+\end{subsubparts}
+\end{subparts}
+\end{parts}
 
 
 
