@@ -16,5 +16,6 @@ contributes:
       header-includes:
         - \usepackage{colortbl}
         - \usepackage{lastpage}
+        - \usepackage{_extensions/examclass/examadditions}
     # (other formats)
 

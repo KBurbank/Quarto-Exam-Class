@@ -3,9 +3,7 @@ title: "Example Exam"
 format: 
   examClass-pdf:
     keep-tex: true
-    header-includes:
-      - \input{exam_additions.cls}
-      - \usepackage{multicol}
+
 ---
 
 ```{r echo=F}

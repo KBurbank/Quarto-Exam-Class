@@ -1,0 +1,72 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{examadditions}[2023/05/24 Additional features for the exam class]
+
+
+% ---------- Conditional Question Title ---------- %
+
+\makeatletter
+\newif\ifIsTitledQuestion
+\def\ifIsTitledQuestion{%
+  \ifnum\pdfstrcmp{\thequestiontitle}{\thequestion}=0 %
+    \expandafter\@secondoftwo
+  \else
+    \expandafter\@firstoftwo
+  \fi
+  {\IsTitledQuestiontrue}%
+  {\IsTitledQuestionfalse}%
+  \ifIsTitledQuestion
+}
+\makeatother
+
+\makeatletter
+\newcommand{\conditionalQuestionTitle}{%
+  \ifIsTitledQuestion
+    \thequestiontitle
+  \else
+    \@empty
+  \fi
+}
+\makeatother
+
+% ---------- Multicol Checkboxes Environment ---------- %
+\RequirePackage{multicol}
+
+\newenvironment{multicolcheckboxes}{%
+\begin{checkboxes}\begin{multicols}{2}%
+}{%
+\end{multicols}\end{checkboxes}%
+}
+
+% ---------- True/False Environment ---------- %
+\RequirePackage{ifthen}
+
+\newenvironment{true_false_questions}[1][]{%
+    \vspace{0.5em}
+    \begin{tabular}[t]{p{0.7\textwidth}cc}
+    \textbf{#1} & \textbf{True} & \textbf{False} \\
+    \hline
+    \noalign{\vspace{2pt}}
+}{%
+    \end{tabular}
+}
+
+\newcommand{\tfitem}[2]{%
+    #1 & \TrueFalseChoice{#2} & \TrueFalseChoice{\ifstrequal{#2}{T}{F}{T}} \\[2pt]
+}
+
+\makeatletter
+\newcommand*{\TrueFalseChoice}[1]{%
+    \ifprintanswers
+        \ifthenelse{\equal{#1}{T}}{%
+        {\color@begingroup\CorrectChoice@Emphasis\checked@char
+        \color@endgroup}%
+        }{%
+        \checkbox@char
+        }%
+    \else
+    \checkbox@char
+    \fi
+}
+\makeatother
+
+\endinput
