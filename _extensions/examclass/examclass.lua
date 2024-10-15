@@ -8,7 +8,7 @@ local MAX_DEPTH = 5
 
 function RawBlock(el)
     if el.format == "tex" then
-        return identifyAndHandleLatexElement(el, 0)
+        return identifyAndHandleLatexEnvironment(el, 0)
     end
     return el
 end
@@ -36,72 +36,10 @@ function markdownifyCommandAndText(text, cmd_pattern, depth)
 end
 
 -- Updated process_inline_container function
-function traverseAndTransformInlineLatex(el, depth)
-    -- Check if we've reached the maximum recursion depth
-    if depth >= MAX_DEPTH then
-        return el
-    end
 
-    local result = {}
-    local i = 1
-    while i <= #el.content do
-        local inline = el.content[i]
-        if inline.t == "Str" then
-            -- Combine consecutive string elements to handle commands that might be split across them
-            local command_text = inline.text
-            local j = i + 1
-            while j <= #el.content and el.content[j].t == "Str" do
-                command_text = command_text .. el.content[j].text
-                j = j + 1
-            end
-            
-            -- Use the new helper function
-            local parsedCommandAndFollowingText = findMatchingLatexCommand(command_text, depth)
-            
-            if parsedCommandAndFollowingText then
-                -- If a command was found and processed, add the result to our output
-                if type(parsedCommandAndFollowingText) == "table" then
-                    for _, p in ipairs(parsedCommandAndFollowingText) do
-                        table.insert(result, p)
-                    end
-                else
-                    table.insert(result, parsedCommandAndFollowingText)
-                end
-                -- Skip over the strings we've just processed
-                i = j - 1
-            else
-                -- If no command was found, just add the original string to the output
-                table.insert(result, inline)
-            end
-        else
-            -- For non-string elements, add them to the output unchanged
-            table.insert(result, inline)
-        end
-        i = i + 1
-    end
-    
-    -- Return a new Para or Plain element with our processed content
-    return el.t == "Para" and pandoc.Para(result) or pandoc.Plain(result)
-end
 
 -- Updated process_element function
-function identifyAndHandleLatexElement(el, depth)
-    if depth >= MAX_DEPTH then
-        return el
-    end
-    
-    -- Check for environments
-    local begin_pattern, optional_arg, content, end_pattern = findMatchingLatexEnvironment(el)
-    if begin_pattern then
-        return reinterpretLatexContentAsMarkdown(begin_pattern .. optional_arg, content, end_pattern, depth + 1)
-    end
 
-    -- Check for commands
-    local processed = findMatchingLatexCommand(el.text, depth)
-    if processed then return processed end
-    
-    return el
-end
 
 
 
@@ -110,20 +48,12 @@ function reinterpretLatexContentAsMarkdown(begin_text, content, end_text, depth)
     local result = {pandoc.RawInline("tex", begin_text)}
     for _, block in ipairs(parsed) do
         if block.t == "RawBlock" and block.format == "tex" then
-            local processed = identifyAndHandleLatexElement(block, depth)
-            if type(processed) == "table" then
-                for _, p in ipairs(processed) do
-                    table.insert(result, p)
-                end
-            else
-                table.insert(result, processed)
-            end
+            local processed = identifyAndHandleLatexEnvironment(block, depth)
+            insertProcessedElements(result, processed)
         elseif block.t == "Para" or block.t == "Plain" then
             local processed = traverseAndTransformInlineLatex(block, depth)
             if type(processed) == "table" then
-                for _, p in ipairs(processed.content) do
-                    table.insert(result, p)
-                end
+                insertProcessedElements(result, processed.content)
             else
                 table.insert(result, processed)
             end
@@ -138,6 +68,63 @@ function reinterpretLatexContentAsMarkdown(begin_text, content, end_text, depth)
 end
 
 
+function identifyAndHandleLatexEnvironment(el, depth)
+    if depth >= MAX_DEPTH then
+        return el
+    end
+    
+    -- Check for environments
+    local begin_pattern, optional_arg, content, end_pattern = findMatchingLatexEnvironment(el)
+    if begin_pattern then
+        return reinterpretLatexContentAsMarkdown(begin_pattern .. optional_arg, content, end_pattern, depth + 1)
+    end
+
+    -- Check for commands
+    local command_with_args, textAfterCommand = findMatchingLatexCommand(el.text)
+    if command_with_args then
+        return reinterpretLatexContentAsMarkdown(command_with_args, textAfterCommand, nil, depth + 1)
+    end
+    
+    return el
+end
+
+function traverseAndTransformInlineLatex(el, depth)
+    -- Check if we've reached the maximum recursion depth
+    if depth >= MAX_DEPTH then
+        return el
+    end
+
+    local result = {}
+    local i = 1
+    while i <= #el.content do
+        local inline = el.content[i]
+        if inline.t == "Str" then
+            -- Use the new utility function to combine consecutive string elements
+            local command_text, j = combineConsecutiveStrings(el, i)
+            
+            -- Use the updated helper function
+            local command_with_args, textAfterCommand = findMatchingLatexCommand(command_text)
+            
+            if command_with_args then
+                -- If a command was found, process it
+                local processed = reinterpretLatexContentAsMarkdown(command_with_args, textAfterCommand, nil, depth + 1)
+                insertProcessedElements(result, processed)
+                -- Skip over the strings we've just processed
+                i = j
+            else
+                -- If no command was found, just add the original string to the output
+                table.insert(result, inline)
+            end
+        else
+            -- For non-string elements, add them to the output unchanged
+            table.insert(result, inline)
+        end
+        i = i + 1
+    end
+    
+    -- Return a new Para or Plain element with our processed content
+    return el.t == "Para" and pandoc.Para(result) or pandoc.Plain(result)
+end
 -- Check whether a block contains a Latex comment, i.e. a line starting with %. If it does, return a RawBlock with the content of the block, otherwise return the block.
 -- This is needed because Pandoc doesn't automatically Latex comments in Markdown code, and it escapes the % automatically..
 
@@ -169,11 +156,14 @@ function findLatexComments(block)
 end
 
 -- New helper function
-function findMatchingLatexCommand(text, depth)
+function findMatchingLatexCommand(text)
     for _, cmd in ipairs(commands) do
-        local processed = markdownifyCommandAndText(text, '\\' .. cmd, depth)
-        if processed then
-            return processed
+        local cmd_pattern = '\\' .. cmd
+        if startsWithPattern(cmd_pattern, text) then
+            local cmd_end, content_start = findCommandEnd(text, #cmd_pattern + 1)
+            local command_with_args = text:sub(1, cmd_end)
+            local textAfterCommand = text:sub(content_start)
+            return command_with_args, textAfterCommand
         end
     end
     return nil
@@ -250,3 +240,34 @@ end
 function endsWithPattern(ending, str)
     return ending == "" or str:sub(-#ending) == ending
 end
+
+-- New utility function
+function insertProcessedElements(result, processed)
+    if type(processed) == "table" then
+        for _, p in ipairs(processed) do
+            table.insert(result, p)
+        end
+    else
+        table.insert(result, processed)
+    end
+end
+
+-- New utility function
+function combineConsecutiveStrings(el, start_index)
+    local combined_text = el.content[start_index].text
+    local end_index = start_index
+    
+    for j = start_index + 1, #el.content do
+        if el.content[j].t == "Str" then
+            combined_text = combined_text .. el.content[j].text
+            end_index = j
+        else
+            break
+        end
+    end
+    
+    return combined_text, end_index
+end
+
+
+
