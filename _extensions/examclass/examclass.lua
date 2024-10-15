@@ -2,7 +2,7 @@
 -- The script works by finding the specific environments used by the Exam class and manually processing the content of these environments using the usual Markdown reader.
 -- It also processes the "part" command and marks it as raw inline (as well as "question", "subpart" and "titledquestion").
 
-local environments = {"questions", "parts", "subparts", "subsubparts", "solution", "coverpages", "EnvFullwidth", "solution", "choices","checkboxes"}
+local environments = {"questions", "parts", "subparts", "subsubparts", "solution", "coverpages", "EnvFullwidth", "solution", "choices", "checkboxes", "true_false_questions"}
 local commands = { "part","question", "subpart","titledquestion", "subsubpart", "choice","CorrectChoice"}
 local MAX_DEPTH = 5
 
@@ -24,16 +24,6 @@ end
 
 
 -- New unified function for processing commands
--- This function is used to find the command and its arguments in the text and to process the content of the command as Markdown.
-function markdownifyCommandAndText(text, cmd_pattern, depth)
-    if startsWithPattern(cmd_pattern, text) then
-        local cmd_end, content_start = findCommandEnd(text, #cmd_pattern + 1)
-        local command_with_args = text:sub(1, cmd_end)
-        local textAfterCommand = text:sub(content_start)
-        return reinterpretLatexContentAsMarkdown(command_with_args, textAfterCommand, nil, depth + 1)
-    end
-    return nil
-end
 
 -- Updated process_inline_container function
 
@@ -48,15 +38,10 @@ function reinterpretLatexContentAsMarkdown(begin_text, content, end_text, depth)
     local result = {pandoc.RawInline("tex", begin_text)}
     for _, block in ipairs(parsed) do
         if block.t == "RawBlock" and block.format == "tex" then
-            local processed = identifyAndHandleLatexEnvironment(block, depth)
-            insertProcessedElements(result, processed)
+            -- The result will be a table, so we use insertProcessedElements to add it to the result
+            insertProcessedElements(result, identifyAndHandleLatexEnvironment(block, depth))
         elseif block.t == "Para" or block.t == "Plain" then
-            local processed = traverseAndTransformInlineLatex(block, depth)
-            if type(processed) == "table" then
-                insertProcessedElements(result, processed.content)
-            else
-                table.insert(result, processed)
-            end
+            table.insert(result, identifyAndHandleInlineLatex(block, depth))           
         else
             table.insert(result, block)
         end
@@ -80,7 +65,7 @@ function identifyAndHandleLatexEnvironment(el, depth)
     end
 
     -- Check for commands
-    local command_with_args, textAfterCommand = findMatchingLatexCommand(el.text)
+    local command_with_args, textAfterCommand = findLatexCommand(el.text)
     if command_with_args then
         return reinterpretLatexContentAsMarkdown(command_with_args, textAfterCommand, nil, depth + 1)
     end
@@ -88,7 +73,7 @@ function identifyAndHandleLatexEnvironment(el, depth)
     return el
 end
 
-function traverseAndTransformInlineLatex(el, depth)
+function identifyAndHandleInlineLatex(el, depth)
     -- Check if we've reached the maximum recursion depth
     if depth >= MAX_DEPTH then
         return el
@@ -100,15 +85,14 @@ function traverseAndTransformInlineLatex(el, depth)
         local inline = el.content[i]
         if inline.t == "Str" then
             -- Use the new utility function to combine consecutive string elements
-            local command_text, j = combineConsecutiveStrings(el, i)
+            local text_to_search, j = combineConsecutiveStrings(el, i)
             
-            -- Use the updated helper function
-            local command_with_args, textAfterCommand = findMatchingLatexCommand(command_text)
+            -- Find the first command, if any, in the string.
+            local command_with_args, textAfterCommand = findLatexCommand(text_to_search)
             
             if command_with_args then
-                -- If a command was found, process it
-                local processed = reinterpretLatexContentAsMarkdown(command_with_args, textAfterCommand, nil, depth + 1)
-                insertProcessedElements(result, processed)
+                -- A command was found. Process the text after the command as Markdown
+                insertProcessedElements(result, reinterpretLatexContentAsMarkdown(command_with_args, textAfterCommand, nil, depth + 1))
                 -- Skip over the strings we've just processed
                 i = j
             else
@@ -125,8 +109,7 @@ function traverseAndTransformInlineLatex(el, depth)
     -- Return a new Para or Plain element with our processed content
     return el.t == "Para" and pandoc.Para(result) or pandoc.Plain(result)
 end
--- Check whether a block contains a Latex comment, i.e. a line starting with %. If it does, return a RawBlock with the content of the block, otherwise return the block.
--- This is needed because Pandoc doesn't automatically Latex comments in Markdown code, and it escapes the % automatically..
+
 
 function findLatexComments(block)
     contains_comment = false
@@ -156,12 +139,13 @@ function findLatexComments(block)
 end
 
 -- New helper function
-function findMatchingLatexCommand(text)
+function findLatexCommand(text)
     for _, cmd in ipairs(commands) do
         local cmd_pattern = '\\' .. cmd
         if startsWithPattern(cmd_pattern, text) then
             local cmd_end, content_start = findCommandEnd(text, #cmd_pattern + 1)
             local command_with_args = text:sub(1, cmd_end)
+            io.stderr:write("command_with_args: " .. command_with_args .. "\n")
             local textAfterCommand = text:sub(content_start)
             return command_with_args, textAfterCommand
         end
@@ -196,8 +180,9 @@ function findMatchingLatexEnvironment(el, depth)
     return nil
 end
 
-
--- Utility
+--
+-- Utility Functions
+--
 
 function findCommandEnd(text, start_pos)
     local pos = start_pos
@@ -241,7 +226,7 @@ function endsWithPattern(ending, str)
     return ending == "" or str:sub(-#ending) == ending
 end
 
--- New utility function
+
 function insertProcessedElements(result, processed)
     if type(processed) == "table" then
         for _, p in ipairs(processed) do
@@ -252,7 +237,7 @@ function insertProcessedElements(result, processed)
     end
 end
 
--- New utility function
+
 function combineConsecutiveStrings(el, start_index)
     local combined_text = el.content[start_index].text
     local end_index = start_index
@@ -268,6 +253,7 @@ function combineConsecutiveStrings(el, start_index)
     
     return combined_text, end_index
 end
+
 
 
 
