@@ -13,6 +13,16 @@ function RawBlock(el)
     return el
 end
 
+
+function Para(el)
+    return pandoc.Para(findLatexComments(el))
+end
+
+function Plain(el)
+    return pandoc.Plain(findLatexComments(el))
+end
+
+
 -- New unified function for processing commands
 -- This function is used to find the command and its arguments in the text and to process the content of the command as Markdown.
 function markdownifyCommandAndText(text, cmd_pattern, depth)
@@ -81,6 +91,96 @@ function identifyAndHandleLatexElement(el, depth)
     end
     
     -- Check for environments
+    local begin_pattern, optional_arg, content, end_pattern = findMatchingLatexEnvironment(el)
+    if begin_pattern then
+        return reinterpretLatexContentAsMarkdown(begin_pattern .. optional_arg, content, end_pattern, depth + 1)
+    end
+
+    -- Check for commands
+    local processed = findMatchingLatexCommand(el.text, depth)
+    if processed then return processed end
+    
+    return el
+end
+
+
+
+function reinterpretLatexContentAsMarkdown(begin_text, content, end_text, depth)
+    local parsed = pandoc.read(content, "markdown").blocks
+    local result = {pandoc.RawInline("tex", begin_text)}
+    for _, block in ipairs(parsed) do
+        if block.t == "RawBlock" and block.format == "tex" then
+            local processed = identifyAndHandleLatexElement(block, depth)
+            if type(processed) == "table" then
+                for _, p in ipairs(processed) do
+                    table.insert(result, p)
+                end
+            else
+                table.insert(result, processed)
+            end
+        elseif block.t == "Para" or block.t == "Plain" then
+            local processed = traverseAndTransformInlineLatex(block, depth)
+            if type(processed) == "table" then
+                for _, p in ipairs(processed.content) do
+                    table.insert(result, p)
+                end
+            else
+                table.insert(result, processed)
+            end
+        else
+            table.insert(result, block)
+        end
+    end
+    if end_text then
+        table.insert(result, pandoc.RawInline("tex", end_text))
+    end
+    return result
+end
+
+
+-- Check whether a block contains a Latex comment, i.e. a line starting with %. If it does, return a RawBlock with the content of the block, otherwise return the block.
+-- This is needed because Pandoc doesn't automatically Latex comments in Markdown code, and it escapes the % automatically..
+
+function findLatexComments(block)
+    contains_comment = false
+    for i, el in ipairs(block.content) do
+        if el.t == "Str" and el.text:match("^%%") then
+            if i == 1 or (i > 1 and block.content[i-1].t == "SoftBreak") then
+                contains_comment = true
+            end
+        end
+    end
+    if contains_comment then
+        local result = {}
+        
+        for _, item in ipairs(block.content) do
+            if item.t == "Str" then
+                table.insert(result, pandoc.RawInline("tex", item.text))
+            elseif item.t == "Space" then
+                table.insert(result, pandoc.RawInline("tex", " "))
+            else
+                table.insert(result, item)
+            end
+        end
+        return result
+    else
+        return block.content
+    end
+end
+
+-- New helper function
+function findMatchingLatexCommand(text, depth)
+    for _, cmd in ipairs(commands) do
+        local processed = markdownifyCommandAndText(text, '\\' .. cmd, depth)
+        if processed then
+            return processed
+        end
+    end
+    return nil
+end
+
+-- New function to check for LaTeX environments
+function findMatchingLatexEnvironment(el, depth)
     for _, env in ipairs(environments) do
         local begin_pattern = '\\begin{' .. env .. '}'
         local end_pattern = '\\end{' .. env .. '}'
@@ -99,17 +199,15 @@ function identifyAndHandleLatexElement(el, depth)
             
             if endsWithPattern(end_pattern, el.text) then
                 local content = el.text:sub(content_start, -#end_pattern - 1)
-                return reinterpretLatexContentAsMarkdown(begin_pattern .. optional_arg, content, end_pattern, depth + 1)
+                return begin_pattern, optional_arg, content, end_pattern
             end
         end
     end
-
-    -- Check for commands
-    local processed = findMatchingLatexCommand(el.text, depth)
-    if processed then return processed end
-    
-    return el
+    return nil
 end
+
+
+-- Utility
 
 function findCommandEnd(text, start_pos)
     local pos = start_pos
@@ -144,37 +242,6 @@ function findCommandEnd(text, start_pos)
     return pos - 1, pos
 end
 
-function reinterpretLatexContentAsMarkdown(begin_text, content, end_text, depth)
-    local parsed = pandoc.read(content, "markdown").blocks
-    local result = {pandoc.RawInline("tex", begin_text)}
-    for _, block in ipairs(parsed) do
-        if block.t == "RawBlock" and block.format == "tex" then
-            local processed = identifyAndHandleLatexElement(block, depth)
-            if type(processed) == "table" then
-                for _, p in ipairs(processed) do
-                    table.insert(result, p)
-                end
-            else
-                table.insert(result, processed)
-            end
-        elseif block.t == "Para" or block.t == "Plain" then
-            local processed = traverseAndTransformInlineLatex(block, depth)
-            if type(processed) == "table" then
-                for _, p in ipairs(processed.content) do
-                    table.insert(result, p)
-                end
-            else
-                table.insert(result, processed)
-            end
-        else
-            table.insert(result, block)
-        end
-    end
-    if end_text then
-        table.insert(result, pandoc.RawInline("tex", end_text))
-    end
-    return result
-end
 
 function startsWithPattern(start, str)
     return str:sub(1, #start) == start
@@ -182,53 +249,4 @@ end
 
 function endsWithPattern(ending, str)
     return ending == "" or str:sub(-#ending) == ending
-end
-
--- Check whether a block contains a Latex comment, i.e. a line starting with %. If it does, return a RawBlock with the content of the block, otherwise return the block.
--- This is needed because Pandoc doesn't automatically Latex comments in Markdown code, and it escapes the % automatically..
-
-function findLatexComments(block)
-    contains_comment = false
-    for i, el in ipairs(block.content) do
-        if el.t == "Str" and el.text:match("^%%") then
-            if i == 1 or (i > 1 and block.content[i-1].t == "SoftBreak") then
-                contains_comment = true
-            end
-        end
-    end
-    if contains_comment then
-        local result = {}
-        
-        for _, item in ipairs(block.content) do
-            if item.t == "Str" then
-                table.insert(result, pandoc.RawInline("tex", item.text))
-            elseif item.t == "Space" then
-                table.insert(result, pandoc.RawInline("tex", " "))
-            else
-                table.insert(result, item)
-            end
-        end
-        return result
-    else
-        return block.content
-    end
-end
-
-function Para(el)
-    return pandoc.Para(findLatexComments(el))
-end
-
-function Plain(el)
-    return pandoc.Plain(findLatexComments(el))
-end
-
--- New helper function
-function findMatchingLatexCommand(text, depth)
-    for _, cmd in ipairs(commands) do
-        local processed = markdownifyCommandAndText(text, '\\' .. cmd, depth)
-        if processed then
-            return processed
-        end
-    end
-    return nil
 end
