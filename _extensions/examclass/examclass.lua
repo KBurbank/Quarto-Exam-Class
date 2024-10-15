@@ -8,12 +8,24 @@ local MAX_DEPTH = 5
 
 function RawBlock(el)
     if el.format == "tex" then
-        return process_element(el, 0)
+        return processLatexElement(el, 0)
     end
     return el
 end
 
-function process_inline_container(el, depth)
+-- New unified function for processing commands
+function processLatexCommand(text, cmd_pattern, depth)
+    if startsWithPattern(cmd_pattern, text) then
+        local cmd_end, content_start = findCommandEnd(text, #cmd_pattern + 1)
+        local command_with_args = text:sub(1, cmd_end)
+        local content = text:sub(content_start)
+        return processLatexContent(command_with_args, content, nil, depth + 1)
+    end
+    return nil
+end
+
+-- Updated process_inline_container function
+function processInlineLatexContainer(el, depth)
     if depth >= MAX_DEPTH then
         return el
     end
@@ -23,44 +35,32 @@ function process_inline_container(el, depth)
     while i <= #el.content do
         local inline = el.content[i]
         if inline.t == "Str" then
-            -- Process for LaTeX commands as before
-            local command_found = false
-            for _, cmd in ipairs(commands) do
-                local cmd_pattern = '\\' .. cmd
-                if starts_with(cmd_pattern, inline.text) then
-                    local command_text = inline.text
-                    local j = i + 1
-                    while j <= #el.content do
-                        local next_inline = el.content[j]
-                        if next_inline.t == "Str" and (next_inline.text:match("^%[") or next_inline.text:match("^{")) then
-                            command_text = command_text .. next_inline.text
-                            j = j + 1
-                        else
-                            break
-                        end
-                    end
-                    local processed = process_element({text = command_text, format = "tex"}, depth + 1)
-                    if type(processed) == "table" then
-                        for _, p in ipairs(processed) do
-                            table.insert(result, p)
-                        end
-                    else
-                        table.insert(result, processed)
-                    end
-                    i = j - 1
-                    command_found = true
-
-                    break
-                end
+            local command_text = inline.text
+            local j = i + 1
+            while j <= #el.content and el.content[j].t == "Str" do
+                command_text = command_text .. el.content[j].text
+                j = j + 1
             end
-            if not command_found then
+            
+            local processed = nil
+            for _, cmd in ipairs(commands) do
+                processed = processLatexCommand(command_text, '\\' .. cmd, depth)
+                if processed then break end
+            end
+            
+            if processed then
+                if type(processed) == "table" then
+                    for _, p in ipairs(processed) do
+                        table.insert(result, p)
+                    end
+                else
+                    table.insert(result, processed)
+                end
+                i = j - 1
+            else
                 table.insert(result, inline)
             end
-        elseif inline.t == "RawInline" then
-
-            table.insert(result, inline)
         else
-            -- Handle other element types
             table.insert(result, inline)
         end
         i = i + 1
@@ -68,16 +68,17 @@ function process_inline_container(el, depth)
     return el.t == "Para" and pandoc.Para(result) or pandoc.Plain(result)
 end
 
-function process_element(el, depth)
+-- Updated process_element function
+function processLatexElement(el, depth)
     if depth >= MAX_DEPTH then
         return el
     end
+    
     -- Check for environments
-
     for _, env in ipairs(environments) do
         local begin_pattern = '\\begin{' .. env .. '}'
         local end_pattern = '\\end{' .. env .. '}'
-        if starts_with(begin_pattern, el.text) then
+        if startsWithPattern(begin_pattern, el.text) then
             local content_start = #begin_pattern + 1
             local optional_arg = ''
             
@@ -90,31 +91,23 @@ function process_element(el, depth)
                 end
             end
             
-            if ends_with(end_pattern, el.text) then
+            if endsWithPattern(end_pattern, el.text) then
                 local content = el.text:sub(content_start, -#end_pattern - 1)
-                return process_content(begin_pattern .. optional_arg, content, end_pattern, depth + 1)
+                return processLatexContent(begin_pattern .. optional_arg, content, end_pattern, depth + 1)
             end
         end
     end
 
-    
     -- Check for commands
     for _, cmd in ipairs(commands) do
-        local cmd_pattern = '\\' .. cmd
-        if starts_with(cmd_pattern, el.text) then
-            local cmd_end, content_start = find_command_end(el.text, #cmd_pattern + 1)
-            local command_with_args = el.text:sub(1, cmd_end)
-            local content = el.text:sub(content_start)
-
-            return process_content(command_with_args, content, nil, depth + 1)
-            
-        end
+        local processed = processLatexCommand(el.text, '\\' .. cmd, depth)
+        if processed then return processed end
     end
     
     return el
 end
 
-function find_command_end(text, start_pos)
+function findCommandEnd(text, start_pos)
     local pos = start_pos
     local bracket_stack = {}
     local in_curly = false
@@ -147,12 +140,12 @@ function find_command_end(text, start_pos)
     return pos - 1, pos
 end
 
-function process_content(begin_text, content, end_text, depth)
+function processLatexContent(begin_text, content, end_text, depth)
     local parsed = pandoc.read(content, "markdown").blocks
     local result = {pandoc.RawInline("tex", begin_text)}
     for _, block in ipairs(parsed) do
         if block.t == "RawBlock" and block.format == "tex" then
-            local processed = process_element(block, depth)
+            local processed = processLatexElement(block, depth)
             if type(processed) == "table" then
                 for _, p in ipairs(processed) do
                     table.insert(result, p)
@@ -161,7 +154,7 @@ function process_content(begin_text, content, end_text, depth)
                 table.insert(result, processed)
             end
         elseif block.t == "Para" or block.t == "Plain" then
-            local processed = process_inline_container(block, depth)
+            local processed = processInlineLatexContainer(block, depth)
             if type(processed) == "table" then
                 for _, p in ipairs(processed.content) do
                     table.insert(result, p)
@@ -179,20 +172,18 @@ function process_content(begin_text, content, end_text, depth)
     return result
 end
 
-function starts_with(start, str)
+function startsWithPattern(start, str)
     return str:sub(1, #start) == start
 end
 
-function ends_with(ending, str)
+function endsWithPattern(ending, str)
     return ending == "" or str:sub(-#ending) == ending
 end
-
-
 
 -- Check whether a block contains a Latex comment, i.e. a line starting with %. If it does, return a RawBlock with the content of the block, otherwise return the block.
 -- This is needed because Pandoc doesn't automatically Latex comments in Markdown code, and it escapes the % automatically..
 
-function find_comments(block)
+function findLatexComments(block)
     contains_comment = false
     for i, el in ipairs(block.content) do
         if el.t == "Str" and el.text:match("^%%") then
@@ -204,7 +195,6 @@ function find_comments(block)
     if contains_comment then
         local result = {}
         
-
         for _, item in ipairs(block.content) do
             if item.t == "Str" then
                 table.insert(result, pandoc.RawInline("tex", item.text))
@@ -221,11 +211,9 @@ function find_comments(block)
 end
 
 function Para(el)
-    return pandoc.Para(find_comments(el))
+    return pandoc.Para(findLatexComments(el))
 end
 
 function Plain(el)
-    return pandoc.Plain(find_comments(el))
+    return pandoc.Plain(findLatexComments(el))
 end
-
-
