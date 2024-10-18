@@ -1,5 +1,8 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{examadditions}[2023/05/24 Additional features for the exam class]
+\RequirePackage{environ}
+\RequirePackage{ifthen}
+
 
 
 % ---------- Conditional Question Title ---------- %
@@ -38,7 +41,7 @@
 }
 
 % ---------- True/False Environment ---------- %
-\RequirePackage{ifthen}
+
 
 \newenvironment{true_false_questions}[1][]{%
     \vspace{0.5em}
@@ -68,5 +71,40 @@
     \fi
 }
 \makeatother
+
+% ---------- opt_notprintanswers Environment ---------- %
+
+% The opt_notprintanswers environment is used to print content that should only be printed if printanswers is false. It can be used to print instructions for the students, for example.
+
+\NewEnviron{opt_notprintanswers}{
+  \ifprintanswers
+  \else
+    \BODY
+  \fi
+}
+
+
+% ---------- Instructions Environment ---------- %
+
+% The instructions environment is just a shortcut for the opt_notprintanswers environment.
+
+\NewEnviron{instructions}{
+  \ifprintanswers
+  \else
+    \BODY
+  \fi
+}
+
+% ---------- opt_printanswers Environment ---------- %
+
+% The opt_printanswers environment is used to print content that should only be printed if printanswers is true. It can be used to print the correct answers to the questions, for example.
+
+\NewEnviron{opt_printanswers}{
+  \ifprintanswers
+    \BODY
+  \fi
+}
+
+
 
 \endinput
