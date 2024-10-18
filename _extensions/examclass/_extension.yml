@@ -9,8 +9,8 @@ contributes:
   formats:
     pdf:
       format-resources:
-        - _extensions/examclass/examadditions.sty
-        - _extensions/examclass/examformat.sty
+        - examadditions.sty
+        - examformat.sty
       filters:
         - wrapExamClassTerms.lua
         - latexComments.lua
