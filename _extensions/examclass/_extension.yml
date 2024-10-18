@@ -19,3 +19,10 @@ contributes:
         - \usepackage{_extensions/examclass/examadditions}
     # (other formats)
 
+knitr:
+  opts_chunk:
+    fig.width: 4
+    fig.height: 3
+    message: false
+    warning: false
+    collapse: true
