@@ -5,10 +5,12 @@ quarto-required: ">=1.4.0"
 contributes:
   filters:
     - wrapExamClassTerms.lua
+    - latexComments.lua
   formats:
     pdf:
       filters:
         - wrapExamClassTerms.lua
+        - latexComments.lua
       keep_tex: true
       documentclass: exam
       geometry: margin = .6in
