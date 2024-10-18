@@ -8,6 +8,9 @@ contributes:
     - latexComments.lua
   formats:
     pdf:
+      format-resources:
+        - _extensions/examclass/examadditions.sty
+        - _extensions/examclass/examformat.sty
       filters:
         - wrapExamClassTerms.lua
         - latexComments.lua
@@ -18,7 +21,8 @@ contributes:
       header-includes:
         - \usepackage{colortbl}
         - \usepackage{lastpage}
-        - \usepackage{_extensions/examclass/examadditions}
+        - \usepackage{examadditions}
+        - \usepackage{examformat}
     # (other formats)
 
 knitr:
