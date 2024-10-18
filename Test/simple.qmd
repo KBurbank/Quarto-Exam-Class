@@ -1,0 +1,153 @@
+---
+title: "Example Exam"
+format: 
+  examClass-pdf:
+    keep-tex: true
+
+---
+
+% This is an template exam file written in RMarkdown using the examClass package. 
+
+% Uncomment the following line to print the solutions.
+%\printanswers
+
+
+\begin{instructions}
+\begin{center}
+\textbf{These are some instructions for the students.}
+\end{center}
+\end{instructions}
+
+
+
+\begin{opt_printanswers}
+These are some things that will only be printed if solutions are being printed. It might include general instructions for graders.
+
+Here we can also include a grade table:
+
+\begin{center}
+\gradetable[v][questions]
+\end{center}
+
+\end{opt_printanswers}
+
+\newpage
+
+\begin{questions}
+
+
+%
+%
+% ----------- Question 1 -----------
+%
+%
+\titledquestion{Basic question with R code chunk}[4]
+
+Text of the first question. The question will be worth 4 points.
+
+R code chunks can be included in questions (or solutions).
+```{r}
+x <- rnorm(100)
+y <- x + rnorm(100)
+plot(x, y)
+```
+
+Because we have specified "[2in]" in the solution command below, two inches of blank space will be left here when solutions are not being printed.
+
+\begin{solution}[2in]
+Solution to the first question. Two inches of blank space will be left here when solutions are not being printed.
+\end{solution}
+
+\newpage
+%
+%
+% ----------- Question 2 -----------
+%
+%
+
+
+\titledquestion{Basic question with parts}
+
+It is easy to add parts and subparts to a question.
+
+When a question has parts, the total points for the question will be calculated automatically from the points for the parts.
+
+\begin{parts}
+
+\part[3]
+
+Text of the first part. This part will be worth 3 points.
+
+\begin{solution}[1in]
+Solution for the first part.
+\end{solution}
+
+\part
+
+Text of the second part. This part has subparts, so its points will be calculated automatically from the points for the subparts.
+
+\begin{subparts}
+
+\subpart[1]
+Text of the first subpart. The subpart will be worth 1 point.
+
+\begin{solution}
+Solution for the first subpart.
+\end{solution}
+
+\subpart[2]
+Text of the second subpart.
+
+\begin{solution}
+Solution for the second subpart.
+\end{solution}
+
+\end{subparts}
+\end{parts}
+
+\newpage
+%
+%
+% ----------- Question 3 -----------
+%
+%
+
+\titledquestion{Demonstrating multiple choice and true/false questions}
+
+\begin{parts}
+
+\part[3]
+
+Please select the correct answer.
+
+\begin{checkboxes}
+\choice First incorrect choice.
+\CorrectChoice This choice is correct.
+\choice Second incorrect choice.
+\end{checkboxes}
+
+\part
+
+Mark the following statements as true or false.
+
+\begin{true_false_questions}
+\tfitem{A correct statement}{T}
+\tfitem{An incorrect statement}{F}
+\tfitem{Another incorrect statement}{F}
+\end{true_false_questions}
+
+\end{parts}
+
+
+\end{questions}
+
+\newpage
+
+\begin{opt_notprintanswers}
+\begin{center}
+\textbf{This text will only be printed if when we are not printing solutions. You might use this environment to print z-tables or formula sheets at the end of the exam.}
+\end{center}
+\end{opt_notprintanswers}
+
+
+
