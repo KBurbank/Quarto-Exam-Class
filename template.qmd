@@ -3,12 +3,14 @@ title: "Example Exam"
 format: 
   examclass-pdf:
     keep-tex: true
+  examclass-pdf+solutions: default
 
 ---
 
 % This is an template exam file written in RMarkdown using the examClass package. 
 
 % Uncomment the following line to print the solutions.
+
 %\printanswers
 
 

@@ -7,7 +7,7 @@ contributes:
     - wrapExamClassTerms.lua
     - latexComments.lua
   formats:
-    pdf:
+    common:
       format-resources:
         - examadditions.sty
         - examformat.sty
@@ -23,6 +23,11 @@ contributes:
         - \usepackage{lastpage}
         - \usepackage{examadditions}
         - \usepackage{examformat}
+    pdf: default
+    pdf+solutions:
+      header-includes:
+        - \solutionstitle
+      classoption: answers
     # (other formats)
 
 knitr:

@@ -21,3 +21,11 @@
 \footer{}{Page \thepage\ of \pageref*{LastPage}}{}
 
 }
+
+% New command to set a solutions title
+\newcommand{\solutionstitle}{%
+  \let\oldtitle\title
+  \renewcommand{\title}[1]{%
+    \oldtitle{##1 Solutions}%
+  }%
+}
