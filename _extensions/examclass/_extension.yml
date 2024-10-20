@@ -10,7 +10,6 @@ contributes:
     common:
       format-resources:
         - examadditions.sty
-        - examformat.sty
       filters:
         - wrapExamClassTerms.lua
         - latexComments.lua
@@ -22,13 +21,24 @@ contributes:
         - \usepackage{colortbl}
         - \usepackage{lastpage}
         - \usepackage{examadditions}
-        - \usepackage{examformat}
+      include-in-header:
+        - text: |
+            \checkboxchar{$\Box$}
+            \checkedchar{$\blacksquare$}
+            \addpoints
+            \qformat{%
+            \textbf{\thequestion.}%
+            \textit{ \conditionalQuestionTitle}\hfill (\totalpoints\ points in total)
+            }
+            % Set the page style to have a header and footer.
+            \pagestyle{headandfoot}
+            \footer{}{Page \thepage\ of \pageref*{LastPage}}{}
     pdf: default
     pdf+solutions:
       header-includes:
         - \solutionstitle
       classoption: answers
-    # (other formats)
+      # (other formats)
 
 knitr:
   opts_chunk:
