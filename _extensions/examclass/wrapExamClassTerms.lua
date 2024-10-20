@@ -1,3 +1,5 @@
+-- This file is used to mark certain commands used in the examclass package with backticks so that Pandoc will process them as raw LaTeX. Importantly, this stops Pandoc from processing the inside of the `questions` environment as a pure Latex block, allowing us to use Markdown instead. It also stops Pandoc from escaping  examClass macros which Pandoc doesn't recognize as Latex macros.
+
 local environments = {"questions", "parts", "subparts", "subsubparts", "solution", "coverpages", "EnvFullwidth", "choices", "checkboxes", "multicolcheckboxes"}
 
 local function processRawBlocks(el)

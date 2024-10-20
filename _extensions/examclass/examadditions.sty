@@ -1,3 +1,8 @@
+% This file is used to add additional features to the examclass package.
+% First, it adds three new environments to make it easier for users to include content depending on whether answers are being printed or not: opt_notprintanswers, instructions (which is just an alias for opt_notprintanswers), and opt_printanswers.
+% Second, it adds a macro called \solutionstitle which can be used to change the title of the document to the original title with "Solutions" appended.
+% Third, it adds a new environment called true_false_questions which is used to create true/false questions.
+% Fourth, it adds a new environment called multicolcheckboxes which is used to create multiple choice questions with multiple columns of checkboxes.
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{examadditions}[2023/05/24 Additional features for the exam class]
 \RequirePackage{environ}

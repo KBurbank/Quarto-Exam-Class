@@ -1,3 +1,5 @@
+-- This file is used to find lines in a Markdown document which begin with a percent sign (%), and mark these lines as inline LaTeX so that Pandoc will process them as LaTeX comments.
+
 function Para(el)
     return pandoc.Para(findLatexComments(el))
 end
