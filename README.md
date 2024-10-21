@@ -18,7 +18,7 @@ Alternatively, you can add the extension to an existing project:
 quarto add KBurbank/examclass
 ```
 
-This will install the extension under the `_extensions` subdirectory in your document folder.
+This will install the extension under the `_extensions` subdirectory in your current folder.
 
 
 
