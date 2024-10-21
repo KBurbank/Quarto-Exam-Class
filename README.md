@@ -4,19 +4,19 @@ This extension allows you to use the LaTeX [Exam Class](https://math.mit.edu/~ps
 
 The extension provides two pdf output formats, `examclass-pdf` and `examclass-pdf+solutions`. By listing both formats in the header of your document, you can easily render both the student version and the solutions of your exam.
 
-Additionally, the extension provides several question types beyond those provided by the `examclass` package. See the [question_types.qmd](question_types.qmd) file for more information.
+Additionally, the extension provides two question types beyond those provided by the `examclass` package: a true/false question, and a multiple choice question with the answers in two columns. See the [question_types.qmd](question_types.qmd) file for more information.
 
 
 
 ## Installing
 
 
-To start writing a new exam, you can use the following command to install this extension along with a minimal template:
+To start writing a new exam, you can use the following command fro to install this extension along with a minimal template:
 
 ```
 quarto use template KBurbank/examclass
 ```
-This will create a new directory with a basic template for you to modify.
+This will prompt you to create a new directory with the extension and a basic exam template for you to modify.
 
 Alternatively, you can add the extension to an existing project:
 
@@ -24,11 +24,11 @@ Alternatively, you can add the extension to an existing project:
 quarto add KBurbank/examclass
 ```
 
-This will install the extension under the `_extensions` subdirectory in your current folder.
+This will install the extension under the `_extensions` subdirectory in your current working directory.
 
 For more information on installing and using Quarto extensions, see the [Quarto documentation](https://quarto.org/docs/extensions/managing.html).
 
-## Using
+## Usage
 
 The easiest way to get started writing an exam is to modify the [minimal template](template.qmd) provided by the extension when you use `quarto use template`.
 
@@ -60,7 +60,7 @@ Questions, parts, and solutions may also include any standard Quarto content, in
 
 ## Rendering
 
-To render your exam, use the `Render` button in RStudio as usual. If you click on the disclosure triangle to the right of the `Render` button, you can select whether to render the student version of the exam or the solutions.
+To render your exam, use the `Render` button in RStudio as usual. If you click on the disclosure triangle to the right of the `Render` button, you can select whether to render the student version of the exam (`examclass-pdf`) or the solutions (`examclass-pdf+solutions`). The solutions document will have the same name as the student version of the exam, but with `+solutions` appended.
 
 
 ## Example

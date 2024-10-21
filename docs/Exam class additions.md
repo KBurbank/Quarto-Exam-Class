@@ -10,7 +10,7 @@ The class provides a mechanism for conditional question titles using `\condition
 
 It is useful when setting the question title formatting. For instance, 
 
-```latex
+```{=latex}
 \qformat{%
             \textbf{\thequestion.}%
             \textit{ \conditionalQuestionTitle}\hfill (\totalpoints\ points in total)
@@ -26,7 +26,7 @@ The `multicolcheckboxes` environment is a wrapper that puts the `checkboxes` env
 
 Usage:
 
-```latex
+```{=latex}
 \begin{multicolcheckboxes}
 \choice Option A
 \CorrectChoice Option B
