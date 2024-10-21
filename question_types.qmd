@@ -1,0 +1,249 @@
+---
+title: "Example Exam"
+format: 
+  examclass-pdf: default
+  examclass-pdf+solutions: default
+
+---
+
+% This is an example exam file written in RMarkdown using the examclass package.
+
+
+% ---------- Printing different content for exam vs solutions file ---------- %
+
+
+% The "instructions" environment will only be printed if solutions are not being printed.
+
+\begin{instructions}
+\begin{center}
+\large\textbf{Instructions for Students}
+\begin{itemize}
+\item Read each question carefully before answering.
+\item Allocate your time wisely based on the points for each question.
+\item Show all your work for partial credit on computational questions.
+\item Write legibly and circle your final answers where applicable.
+\item If you need additional space, use the back of the previous page and clearly indicate this.
+\end{itemize}
+\end{center}
+\end{instructions}
+
+
+% The "opt_notprintanswers" environment is just an alias for the "instructions" environment, with a different name.
+
+
+\begin{opt_notprintanswers}
+This text will only be printed if solutions are not being printed. You might use this environment to print z-tables or formula sheets at the end of the exam.
+\end{opt_notprintanswers}
+
+
+\begin{opt_printanswers}
+This text will only be printed if solutions are being printed. It might include general instructions for graders.
+\end{opt_printanswers}
+
+
+% ---------- Grading table ---------- %
+% You can add a grading table showing the number of points for each question. This is less useful now that we grade exams online, but it's still nice to use when writing the exam.
+% In this example, we'll add a grading table only when we are printing the answers.
+
+\begin{opt_printanswers}
+\begin{center}
+% Add a grading table.
+\gradetable[v][questions]
+\end{center}
+\end{opt_printanswers}
+
+
+\vspace{0.5cm}
+
+
+% ---------- Question format options  ---------- %
+% Uncomment this to customize the format of the question numbers and titles.  "thequestion" is the question numbe. "conditionalQuestionTitle" is the question title if the question is titled, and empty otherwise.
+
+% \qformat{%
+%   \textbf{\thequestion.}%
+%   \textit{ \conditionalQuestionTitle}\hfill (\totalpoints\ points in total)
+%}
+
+
+
+\newpage
+
+\begin{questions}
+
+# Basic Questions
+
+\titledquestion{Basic question with no parts}[4]
+
+This demonstrates a simple question with a title. It has been assigned 4 points.
+
+\titledquestion{Basic question with parts}
+
+This demonstrates a question with parts. Here, we will assign the points to the parts, and LaTeX will then automatically calculate the total number of points for the question. (The same works for subparts and subsubparts!)
+
+\begin{parts}
+\part[3] This is the first part, worth 3 points.
+\part[2] This is the second part, worth 2 points.
+\end{parts}
+
+# Including solutions and leaving space for answers
+
+% To make this text print at the left margin, we can use the `fullwidth` command. This is useful for including instructions that apply to groups of questions.
+
+\fullwidth{
+You can include solutions to questions or parts by using the `solution` environment.
+
+To print the solutions, render the document with the examclass-pdf+solutions format option.
+
+If you include an optional space parameter when you write a solution, LaTeX will automatically leave that amount of blank  space after the question when solutions are *not* being printed. This is useful if you want to leave space for students to write their answers.
+}
+
+\titledquestion{Question with a solution}[2]
+
+This is a simple question worth 2 points. There are two inches of space after this question when solutions are not being printed.
+
+\begin{solution}[2in]
+This is how you include a solution for a question. It will only appear when answers are printed.
+\end{solution}
+
+
+
+
+# RMarkdown
+
+You can include R code in your exam and solutions.
+
+
+\titledquestion{Including R code}[3]
+
+
+```{r, echo=FALSE}
+x <- rnorm(100)
+y <- x + rnorm(100)
+plot(x, y)
+```
+
+Estimate the mean of `x`.
+
+\begin{solution}
+We can find the mean of `x` using the `mean` function.
+```{r}
+mean(x)
+```
+\end{solution}
+
+# Math
+
+You can include math in your exam and solutions using LaTeX syntax.
+
+\titledquestion{Question with math}[3]
+
+What is the value of $\int_{\pi/2}^{\pi} \frac{1}{x^2} dx$?
+
+\begin{solution}
+We can find the value of this integral using the `integrate` function.
+```{r}
+integrate(function(x) 1/(x^2), pi/2, pi)
+```
+\end{solution}
+
+# Question parts
+
+\titledquestion{Question with parts and solutions}
+
+You can add parts to a question using the `parts` environment. If you assign points to the parts, the total number of points for the question will be calculated automatically.
+
+You can add solutions to the individual parts of a question.
+
+\begin{parts}
+\part[2] This is the first part .
+\begin{solution}
+This is the solution to the first part.
+\end{solution}
+\part[3] This is the second part.
+\begin{solution}
+This is the solution to the second part.
+\end{solution}
+\end{parts}
+
+% Example of a question with subparts and subsubparts
+
+\titledquestion{Question with subparts and subsubparts}
+
+Questions can have subparts and subsubparts.
+
+\begin{parts}
+\part[2] This is a part without any subparts.
+\part This is a part with subparts.
+\begin{subparts}
+\subpart[2] This is a subpart.
+\subpart[3] This is another subpart.
+\begin{subsubparts}
+\subsubpart[3] This is a subsubpart.
+\subsubpart[2] This is another subsubpart.
+\end{subsubparts}
+\end{subparts}
+\end{parts}
+
+\newpage
+
+# Standard Exam Class Question Types
+
+% Example of multiple choice question
+
+\titledquestion{Multiple choice question}[1]
+We can include multiple choice questions with the `choices` environment. The correct answer can be specified with the `\CorrectChoice` command, and it will be highlighted when answers are printed.
+
+\begin{checkboxes}
+\choice This one
+\choice That one
+\CorrectChoice This correct one
+\choice Another one
+\end{checkboxes}
+
+\begin{solution}
+If we want to provide more to the solutions than simply stating the correct choice, we can still do that.
+\end{solution}
+
+# Additional Question Types included with Quarto Exam Class
+
+\fullwidth{
+These question types are defined in the `examadditions.sty` file, which is added to your directory automatically when you render a document using the Quarto Exam Class template.
+}
+
+\titledquestion{True/False questions}[3]
+
+You can easily add true/false questions to your exam. For each item, you'll give the statement and whether it is true or false. The correct answers will show up when solutions are printed.
+
+\begin{true_false_questions}
+\tfitem{This statement should be true}{T}
+\tfitem{This statement should be false}{F}
+\end{true_false_questions}
+
+
+\titledquestion{Multiple choice questions with multiple columns}
+
+You can include multiple choice questions with the `multicolcheckboxes` environment.
+
+\begin{multicolcheckboxes}
+\choice This is a choice
+\CorrectChoice This is **another** choice
+\choice This is yet another choice
+\end{multicolcheckboxes}
+
+
+
+# Including other files
+
+You can include other LaTeX files in your exam using the standard LaTeX `include` command, or other Quarto files using Quarto's `include` shortcode.
+
+{{< include Test/Questions/Cough_Syrup.qmd >}}
+
+
+\end{questions}
+
+
+
+
+
+
+

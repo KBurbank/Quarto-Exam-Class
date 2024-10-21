@@ -7,18 +7,18 @@ Extension for creating exams in Quarto and R Markdown using the exam class packa
 
 To start writing a new exam, you can use the following command to start with a minimal template:
 
-```bash
+```
 quarto use template KBurbank/examclass
 ```
 This will create a new directory with a basic template for you to modify.
 
 Alternatively, you can add the extension to an existing project:
 
-```bash
+```
 quarto add KBurbank/examclass
 ```
 
-This will install the extension under the `_extensions` subdirectory.
+This will install the extension under the `_extensions` subdirectory in your document folder.
 
 
 
@@ -28,7 +28,7 @@ The easiest way to get started writing an exam is to modify the [minimal templat
 
 If you're not using the template, you should set the format in the YAML header of your document to `examclass-pdf`. Additionally, you can add a format for the solutions document by adding `examclass-pdf+solutions`:
 
-```yaml
+```
 format:
   examclass-pdf:
     keep-tex: true
@@ -39,7 +39,7 @@ format:
 
 Then, you should format your document using the Latex commands defined in the [Exam Class documentation](https://math.mit.edu/~psh/exam/examdoc.pdf). You will place questions inside a `questions` environment, and indicate individual questions using the `\question` command or `\titledquestion` commands:
 
-```{verbatim}
+```
 \begin{questions}
 
 \question This is a question
@@ -60,4 +60,6 @@ To render your exam, use the `Render` button in RStudio as usual. If you click o
 ## Example
 
 Here is the source code for a minimal example: [template.qmd](template.qmd). The student version of the exam is rendered as [template.pdf](template.pdf), and the solutions are rendered as [template+solutions.pdf](template+solutions.pdf).
+
+To see more examples of how to use the extension, look at the [question_types.qmd](question_types.qmd) file. The student version of the exam is rendered as [question_types.pdf](question_types.pdf), and the solutions are rendered as [question_types+solutions.pdf](question_types+solutions.pdf).
 
