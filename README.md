@@ -1,11 +1,17 @@
-# ExamClass Extension For Quarto
+# Examclass Extension For Quarto
 
-Extension for creating exams in Quarto and R Markdown using the exam class package in Latex.
+This extension allows you to use the LaTeX [Exam Class](https://math.mit.edu/~psh/exam/examdoc.pdf) document class to write exams in Quarto and R Markdown. You can use standard `examclass`LaTeX commands to format your exam, and include R code and other content using standard RMarkdown syntax.
+
+The extension provides two pdf output formats, `examclass-pdf` and `examclass-pdf+solutions`. By listing both formats in the header of your document, you can easily render both the student version and the solutions of your exam.
+
+Additionally, the extension provides several question types beyond those provided by the `examclass` package. See the [question_types.qmd](question_types.qmd) file for more information.
+
+
 
 ## Installing
 
 
-To start writing a new exam, you can use the following command to start with a minimal template:
+To start writing a new exam, you can use the following command to install this extension along with a minimal template:
 
 ```
 quarto use template KBurbank/examclass
@@ -20,13 +26,13 @@ quarto add KBurbank/examclass
 
 This will install the extension under the `_extensions` subdirectory in your current folder.
 
-
+For more information on installing and using Quarto extensions, see the [Quarto documentation](https://quarto.org/docs/extensions/managing.html).
 
 ## Using
 
-The easiest way to get started writing an exam is to modify the [minimal template](template.qmd) provided by the extension.
+The easiest way to get started writing an exam is to modify the [minimal template](template.qmd) provided by the extension when you use `quarto use template`.
 
-If you're not using the template, you should set the format in the YAML header of your document to `examclass-pdf`. Additionally, you can add a format for the solutions document by adding `examclass-pdf+solutions`:
+If you're not using the template, you should set the format in the YAML header of your existing document to `examclass-pdf`. Additionally, you can add a format for the solutions document by adding `examclass-pdf+solutions`:
 
 ```
 format:
