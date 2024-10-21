@@ -6,5 +6,15 @@
 
 .vscode/
 example.tex
+template.tex
 .quartoignore
 exam.cls
+examadditions.sty
+!/template.pdf
+!/template+solutions.pdf
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
