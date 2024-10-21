@@ -12,9 +12,12 @@ exam.cls
 examadditions.sty
 !/template.pdf
 !/template+solutions.pdf
+!/question_types.pdf
+!/question_types+solutions.pdf
 *.aux
 *.log
 *.out
 *.toc
 *.fls
 *.fdb_latexmk
+Test/_extensions
