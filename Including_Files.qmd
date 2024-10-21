@@ -1,0 +1,14 @@
+--- 
+title: Including files
+---
+
+\titledquestion{Including files}[5]
+
+
+Select all the TRUE statements below.
+
+\begin{true_false_questions}
+\tfitem{Files cannot be included in an exam.}{F}
+\tfitem{Files can be included in an exam using the `include` command.}{T}
+\tfitem{Files can be included in an exam using the quarto `include` shortcode.}{T}
+\end{true_false_questions}

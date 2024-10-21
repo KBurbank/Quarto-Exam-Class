@@ -1,9 +1,0 @@
-format:
-  pdf:
-    include-before-body:
-      - text: '\begin{questions}'
-    include-after-body:
-      - text: '\end{questions}'
-
-
-

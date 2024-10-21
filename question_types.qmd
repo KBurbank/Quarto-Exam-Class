@@ -236,7 +236,7 @@ You can include multiple choice questions with the `multicolcheckboxes` environm
 
 You can include other LaTeX files in your exam using the standard LaTeX `include` command, or other Quarto files using Quarto's `include` shortcode.
 
-{{< include Test/Questions/Cough_Syrup.qmd >}}
+{{< include Including_files.qmd >}}
 
 
 \end{questions}
