@@ -1,8 +1,12 @@
 --- 
 title: Including files
+format:
+    examclass-pdf:
+        keep-tex: true
 ---
 
 \titledquestion{Including files}[5]
+
 
 
 Select all the TRUE statements below.

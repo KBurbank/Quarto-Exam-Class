@@ -3,10 +3,10 @@
 *_files/
 /.luarc.json
 *_cache/
+*.tex
 
 .vscode/
-example.tex
-template.tex
+
 .quartoignore
 exam.cls
 examadditions.sty
@@ -21,3 +21,4 @@ examadditions.sty
 *.fls
 *.fdb_latexmk
 Test/_extensions
+
