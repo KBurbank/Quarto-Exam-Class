@@ -6,6 +6,8 @@ The extension provides two pdf output formats, `examclass-pdf` and `examclass-pd
 
 Additionally, the extension provides two question types beyond those provided by the `examclass` package: a true/false question, and a multiple choice question with the answers in two columns. See the [question_types.qmd](question_types.qmd) file for more information.
 
+Finally, the extension will automatically enclose a document in a `questions` environment if it doesn't contain one already. This allows you to save individual questions as separate files which can be rendered individually or included in a larger exam.
+
 
 
 ## Installing
