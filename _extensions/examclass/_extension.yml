@@ -1,6 +1,6 @@
 title: Examclass
 author: Kendra Burbank
-version: 0.9.1
+version: 0.9.2
 quarto-required: ">=1.4.0"
 contributes:
   filters:
@@ -37,6 +37,7 @@ contributes:
             \footer{}{Page \thepage\ of \pageref*{LastPage}}{}
     pdf: default
     pdf+solutions:
+      keep-md: true
       header-includes:
         - \solutionstitle
       classoption: answers
