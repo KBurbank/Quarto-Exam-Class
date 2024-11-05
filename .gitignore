@@ -22,3 +22,8 @@ examadditions.sty
 *.fdb_latexmk
 Test/_extensions
 
+220Midterm2_24Aut.Rmd
+testwithcomments.ast
+testwithcomments.pdf.md
+testwithcomments.qmd
+_extensions/examclass/parsing.hs
