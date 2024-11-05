@@ -8,6 +8,17 @@ function Plain(el)
     return pandoc.Plain(findLatexComments(el))
 end
 
+function Math(el)
+   -- Check if el is valid and has text property
+   if el and el.text then
+    if el.text:match("^%s%%") then
+        io.stderr:write("We have a comment in math" .. el.text)
+        return(pandoc.RawInline("tex", el.text))
+    else
+      return el
+   end
+end
+end
 
 
 function findLatexComments(block)
