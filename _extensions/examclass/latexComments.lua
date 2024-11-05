@@ -13,7 +13,7 @@ end
 function findLatexComments(block)
     local contains_comment = false
     for i, el in ipairs(block.content) do
-        if el.t == "Str" and el.text:match("^%%") then
+        if el.t == "Str" and (el.text:match("[^\\]%%") or el.text:match("^%%")) then
             if i == 1 or (i > 1 and block.content[i-1].t == "SoftBreak") then
                 -- Debug: Print the element type and content instead of using pandoc.write
 
