@@ -1,6 +1,6 @@
 title: Examclass
 author: Kendra Burbank
-version: 0.9.3
+version: 0.9.4
 quarto-required: ">=1.4.0"
 contributes:
   filters:
