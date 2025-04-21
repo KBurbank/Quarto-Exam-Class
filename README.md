@@ -13,7 +13,7 @@ Finally, the extension will automatically enclose a document in a `questions` en
 ## Installing
 
 
-To start writing a new exam, you can use the following command fro to install this extension along with a minimal template:
+To start writing a new exam, you can use the following command to install this extension along with a minimal template:
 
 ```
 quarto use template KBurbank/examclass
