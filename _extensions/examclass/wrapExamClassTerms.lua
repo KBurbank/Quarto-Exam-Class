@@ -15,12 +15,13 @@ local function processRawBlocks(el)
                 local content = el.text:sub(content_start, content_end - 1)
 
                 -- Surround \part commands with backticks and {=latex}
+                -- Use word boundary to ensure we only match \part as a complete command
                 content = content:gsub("(\\part%b[])", "`%1`{=latex}")
-                content = content:gsub("(\\part)([^[])", "`%1`{=latex}%2")
+                content = content:gsub("(\\part)([%s{}])", "`%1`{=latex}%2")  -- Only match when followed by space or brace
 
                 -- Surround \titledquestion commands with backticks and {=latex}
                 content = content:gsub("(\\titledquestion%b{}%b[])", "`%1`{=latex}")
-                content = content:gsub("(\\titledquestion%b{})([^[])", "`%1`{=latex}")
+                content = content:gsub("(\\titledquestion%b{})([^[])", "`%1`{=latex}%2")
 
                 -- Loop through environments and surround \begin and \end with backticks
                 for _, env in ipairs(environments) do
