@@ -17,7 +17,7 @@ contributes:
         - latexComments.lua
       keep_tex: true
       documentclass: exam
-      geometry: margin = .6in
+      geometry: top=.6in, left=.6in, right=.6in, bottom=1in
       fontsize: 12pt
       header-includes:
         - \usepackage{colortbl}
