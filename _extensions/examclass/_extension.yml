@@ -35,7 +35,9 @@ contributes:
             % Set the page style to have a header and footer.
             \pagestyle{headandfoot}
             \footer{}{Page \thepage\ of \pageref*{LastPage}}{}
-    pdf: default
+    pdf: 
+      header-includes:
+        - \nameboxtitle
     pdf+solutions:
       keep-md: true
       header-includes:

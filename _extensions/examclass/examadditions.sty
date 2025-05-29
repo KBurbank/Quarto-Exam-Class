@@ -119,4 +119,21 @@
   }%
 }
 
+\newcommand{\nameboxtitle}{%
+  \let\oldtitle\title % Save the original \\title command
+  \renewcommand{\title}[1]{% % Redefine \\title
+    % Prepare the formatted title content
+    \def\formattedtitle{%
+      \hfill\normalsize Name: \underline{\hspace{6cm}}\\% Right-justify Name line
+      \par\vspace{3ex}\par% Add vertical space and ensure new paragraph
+      \begin{center}% Center the title
+        {\LARGE ##1}% Apply \LARGE only to the original title
+      \end{center}% 
+    }%
+    % Call the original \\title command with the formatted content
+    \expandafter\oldtitle\expandafter{\formattedtitle}%
+  }%
+}
+
+
 \endinput
