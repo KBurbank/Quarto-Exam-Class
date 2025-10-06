@@ -28,13 +28,21 @@ contributes:
             \checkboxchar{$\Box$}
             \checkedchar{$\blacksquare$}
             \addpoints
-            \qformat{%
-            \textbf{\thequestion.}%
             \textit{ \conditionalQuestionTitle}\hfill (\totalpoints\ points in total)
             }
+            \qformat{\textbf{Question \thequestion.\hfill}}
             % Set the page style to have a header and footer.
             \pagestyle{headandfoot}
             \footer{}{Page \thepage\ of \pageref*{LastPage}}{}
+
+            \chead{\emph{\ifcontinuation{Question \ContinuedQuestion\ Continued}{}}}
+            \footrule
+            \newcommand{\continues}{\ifincomplete
+            {Question \IncompleteQuestion\ continued\ on\ next\ page\ldots}
+            {Homework continues\ldots}}
+            \cfoot{\iflastpage{End of Homework}{\continues}}
+            \rfoot{Page \thepage\ of \numpages}
+
     pdf: 
       header-includes:
         - \nameboxtitle
