@@ -2,7 +2,9 @@
 -- 1. Convert LaTeX environments to fenced Divs (original functionality)
 -- 2. Flatten cell-output-display divs within solution divs
 -- 3. Convert exam-prefixed Div environments back to raw LaTeX
+-- DEBUG: This is the CURRENT VERSION with Div conversion logic
 
+io.stderr:write("=== LOADING CURRENT VERSION OF wrapExamClassTerms.lua ===\n")
 local environments = {"questions", "parts", "subparts", "subsubparts", "solution", "coverpages", "EnvFullwidth", "choices", "checkboxes", "multicolcheckboxes"}
 
 -- Helper function to convert exam-prefixed Div environments back to raw LaTeX
@@ -117,7 +119,7 @@ local function flatten_cell_output_divs(div, is_within_solution)
     return div
 end
 
--- Document-level processing to flatten cell-output-display divs
+-- Document-level processing to flatten cell-output-display divs and convert exam Divs to LaTeX
 local function process_document(doc)
     io.stderr:write("process_document called\n")
     local processed_blocks = {}
@@ -125,9 +127,11 @@ local function process_document(doc)
     for _, block in ipairs(doc.blocks) do
         if block.t == "Div" then
             io.stderr:write("Processing Div with classes: " .. table.concat(block.classes, ", ") .. "\n")
-            -- Flatten cell-output-display divs
+            -- First flatten cell-output-display divs
             local flattened_block = flatten_cell_output_divs(block)
-            table.insert(processed_blocks, flattened_block)
+            -- Then convert exam-prefixed divs to LaTeX
+            local final_block = convert_exam_div_to_latex(flattened_block)
+            table.insert(processed_blocks, final_block)
         else
             table.insert(processed_blocks, block)
         end
@@ -136,12 +140,7 @@ local function process_document(doc)
     return pandoc.Pandoc(processed_blocks, doc.meta)
 end
 
--- Function to convert exam-prefixed Div environments back to raw LaTeX (for filter registration)
-local function Div(el)
-    return convert_exam_div_to_latex(el)
-end
-
 -- Apply all functions
 return {
-    {Pandoc = process_document, RawBlock = processRawBlocks, Div = Div}
+    {Pandoc = process_document, RawBlock = processRawBlocks}
 }
