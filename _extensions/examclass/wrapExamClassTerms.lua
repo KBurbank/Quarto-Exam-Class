@@ -5,6 +5,35 @@
 
 local environments = {"questions", "parts", "subparts", "subsubparts", "solution", "coverpages", "EnvFullwidth", "choices", "checkboxes", "multicolcheckboxes"}
 
+-- Helper function to convert exam-prefixed Div environments back to raw LaTeX
+local function convert_exam_div_to_latex(el)
+    -- Check if this is an exam-prefixed environment
+    for _, env in ipairs(environments) do
+        if el.classes:includes("exam-" .. env) then
+            -- Debug: print what we're converting
+            io.stderr:write("Converting exam-" .. env .. " to LaTeX\n")
+            
+            -- Extract optional arguments from data-opts attribute
+            local opts = ""
+            if el.attr and el.attr.attributes and el.attr.attributes["data-opts"] then
+                opts = "[" .. el.attr.attributes["data-opts"] .. "]"
+            end
+            
+            -- Insert \begin{env}[opts] at the beginning
+            table.insert(el.content, 1, pandoc.RawBlock("latex", "\\begin{" .. env .. "}" .. opts))
+            
+            -- Insert \end{env} at the end
+            table.insert(el.content, pandoc.RawBlock("latex", "\\end{" .. env .. "}"))
+            
+            -- Return the modified div
+            return el
+        end
+    end
+    
+    -- Return unchanged if not an exam environment
+    return el
+end
+
 local function processRawBlocks(el)
     if el.format == "tex" then
         -- Check if it's the start of a "questions" environment
@@ -57,7 +86,7 @@ local function processRawBlocks(el)
     return el
 end
 
--- Function to flatten cell-output-display divs within solution divs. This allows quarto to render the output of R code chunks within solutions.
+-- Function to flatten cell-output-display divs within solution divs
 local function flatten_cell_output_divs(div, is_within_solution)
     local within_solution = is_within_solution or div.classes:includes("solution")
     
@@ -88,45 +117,28 @@ local function flatten_cell_output_divs(div, is_within_solution)
     return div
 end
 
--- Function to convert exam-prefixed Div environments back to raw LaTeX
-local function Div(el)
-    -- Check if this is an exam-prefixed environment
-    for _, env in ipairs(environments) do
-        if el.classes:includes("exam-" .. env) then
-            -- Extract optional arguments from data-opts attribute
-            local opts = ""
-            if el.attr and el.attr.attributes and el.attr.attributes["data-opts"] then
-                opts = "[" .. el.attr.attributes["data-opts"] .. "]"
-            end
-            
-            -- Insert \begin{env}[opts] at the beginning
-            table.insert(el.content, 1, pandoc.RawBlock("latex", "\\begin{" .. env .. "}" .. opts))
-            
-            -- Insert \end{env} at the end
-            table.insert(el.content, pandoc.RawBlock("latex", "\\end{" .. env .. "}"))
-            
-            -- Return the modified div
-            return el
-        end
-    end
-    
-    -- Return unchanged if not an exam environment
-    return el
-end
-
 -- Document-level processing to flatten cell-output-display divs
 local function process_document(doc)
+    io.stderr:write("process_document called\n")
     local processed_blocks = {}
     
     for _, block in ipairs(doc.blocks) do
         if block.t == "Div" then
-            table.insert(processed_blocks, flatten_cell_output_divs(block))
+            io.stderr:write("Processing Div with classes: " .. table.concat(block.classes, ", ") .. "\n")
+            -- Flatten cell-output-display divs
+            local flattened_block = flatten_cell_output_divs(block)
+            table.insert(processed_blocks, flattened_block)
         else
             table.insert(processed_blocks, block)
         end
     end
     
     return pandoc.Pandoc(processed_blocks, doc.meta)
+end
+
+-- Function to convert exam-prefixed Div environments back to raw LaTeX (for filter registration)
+local function Div(el)
+    return convert_exam_div_to_latex(el)
 end
 
 -- Apply all functions
