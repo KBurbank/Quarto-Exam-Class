@@ -4,7 +4,7 @@
 -- 3. Convert exam-prefixed Div environments back to raw LaTeX
 -- DEBUG: This is the CURRENT VERSION with Div conversion logic
 
-io.stderr:write("=== LOADING CURRENT VERSION OF wrapExamClassTerms.lua ===\n")
+
 local environments = {"questions", "parts", "subparts", "subsubparts", "solution", "coverpages", "EnvFullwidth", "choices", "checkboxes", "multicolcheckboxes"}
 
 -- Helper function to convert exam-prefixed Div environments back to raw LaTeX
@@ -13,7 +13,7 @@ local function convert_exam_div_to_latex(el)
     for _, env in ipairs(environments) do
         if el.classes:includes("exam-" .. env) then
             -- Debug: print what we're converting
-            io.stderr:write("Converting exam-" .. env .. " to LaTeX\n")
+     --       io.stderr:write("Converting exam-" .. env .. " to LaTeX\n")
             
             -- Extract optional arguments from data-opts attribute
             local opts = ""
@@ -121,12 +121,12 @@ end
 
 -- Document-level processing to flatten cell-output-display divs and convert exam Divs to LaTeX
 local function process_document(doc)
-    io.stderr:write("process_document called\n")
+ --   io.stderr:write("process_document called\n")
     local processed_blocks = {}
     
     for _, block in ipairs(doc.blocks) do
         if block.t == "Div" then
-            io.stderr:write("Processing Div with classes: " .. table.concat(block.classes, ", ") .. "\n")
+       --     io.stderr:write("Processing Div with classes: " .. table.concat(block.classes, ", ") .. "\n")
             -- First flatten cell-output-display divs
             local flattened_block = flatten_cell_output_divs(block)
             -- Then convert exam-prefixed divs to LaTeX
