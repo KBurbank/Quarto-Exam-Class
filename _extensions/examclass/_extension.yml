@@ -28,8 +28,8 @@ contributes:
             \checkboxchar{$\Box$}
             \checkedchar{$\blacksquare$}
             \addpoints
-            \textit{ \conditionalQuestionTitle}\hfill (\totalpoints\ points in total)
-            }
+            %\textit{ \conditionalQuestionTitle}\hfill (\totalpoints\ points in total)
+            %}
             \qformat{\textbf{Question \thequestion.\hfill}}
             % Set the page style to have a header and footer.
             \pagestyle{headandfoot}
