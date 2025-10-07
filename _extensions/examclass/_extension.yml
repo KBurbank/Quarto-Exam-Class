@@ -6,7 +6,7 @@ contributes:
   filters:
     - add_questions_environment.lua
     - flatten_solution_outputs.lua
-    - wrapExamClassTermsOld.lua
+    - wrapExamClassTerms.lua
     - latexComments.lua
   formats:
     common:
@@ -14,7 +14,7 @@ contributes:
         - examadditions.sty
       filters:
         - add_questions_environment.lua
-        - wrapExamClassTermsOld.lua
+        - wrapExamClassTerms.lua
         - flatten_solution_outputs.lua
         - latexComments.lua
       keep_tex: true
